@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Глубже нуля</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080b10;color:#fff;font-family:Arial,sans-serif;touch-action:none}
+button{font:inherit;color:#fff;border:0;cursor:pointer}
+#game{display:block;width:100%;height:100%;background:#111}
+#stats{
+position:fixed;left:10px;top:10px;z-index:5;
+background:rgba(5,8,14,.88);padding:10px 12px;border:1px solid #394252;
+border-radius:12px;min-width:205px;font-size:14px;line-height:1.45;
+box-shadow:0 5px 18px #0008;pointer-events:none
+}
+#zoneName{font-weight:bold;color:#76d9ff;font-size:16px}
+#capacityBar{height:7px;background:#252c38;border-radius:10px;overflow:hidden;margin-top:4px}
+#capacityFill{height:100%;width:0;background:#56e18d}
+#message{
+position:fixed;top:18%;left:50%;transform:translateX(-50%);z-index:7;
+background:rgba(0,0,0,.75);padding:10px 16px;border-radius:10px;
+font-weight:bold;opacity:0;transition:opacity .25s;pointer-events:none;text-align:center
+}
+#topButtons{position:fixed;right:10px;top:10px;z-index:6;display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end;max-width:52%}
+.smallButton{
+background:#263247;border:1px solid #52647e;border-radius:10px;
+padding:9px 12px;font-weight:bold;box-shadow:0 3px 8px #0007
+}
+.smallButton:active{transform:scale(.96)}
+#panel{
+position:fixed;z-index:10;left:50%;top:50%;transform:translate(-50%,-50%);
+width:min(94vw,620px);max-height:84vh;overflow:auto;background:#111722;
+border:2px solid #445169;border-radius:16px;padding:15px;display:none;
+box-shadow:0 16px 45px #000
+}
+#panel h2{margin:0 0 12px;color:#7cddff}
+#panelClose{position:absolute;right:10px;top:10px;background:#7d3030;border-radius:8px;padding:7px 11px}
+.upgrade{
+display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;
+background:#1c2533;border:1px solid #35445a;border-radius:11px;padding:11px;margin:8px 0
+}
+.upgrade b{color:#f4d875}
+.upgrade button{background:#2879ad;border-radius:8px;padding:9px 12px;font-weight:bold}
+.upgrade button:disabled{background:#3c4149;color:#888}
+#joystick{
+position:fixed;left:20px;bottom:22px;width:126px;height:126px;border-radius:50%;
+background:rgba(42,52,68,.5);border:2px solid rgba(160,185,220,.4);
+z-index:8;display:none;touch-action:none
+}
+#stick{
+position:absolute;width:54px;height:54px;left:34px;top:34px;border-radius:50%;
+background:rgba(126,199,255,.8);border:2px solid #d8f2ff
+}
+#mobileActions{
+position:fixed;right:18px;bottom:20px;z-index:8;display:none;
+grid-template-columns:78px 78px;gap:10px
+}
+.action{
+height:68px;border-radius:50%;font-weight:bold;font-size:13px;
+background:rgba(35,125,174,.82);border:2px solid #a2e3ff;
+box-shadow:0 5px 13px #0008;touch-action:none
+}
+.action:active{transform:scale(.94);background:#49a9d8}
+#mineButton{grid-row:1/3;height:148px;border-radius:28px;background:rgba(200,117,35,.88);border-color:#ffd08a}
+#hint{
+position:fixed;left:50%;bottom:14px;transform:translateX(-50%);
+z-index:5;background:rgba(0,0,0,.66);padding:7px 12px;border-radius:8px;
+font-size:13px;pointer-events:none;white-space:nowrap
+}
+@media(pointer:coarse),(max-width:800px){
+#joystick,#mobileActions{display:grid}
+#hint{display:none}
+#stats{font-size:12px;min-width:170px;padding:8px}
+#zoneName{font-size:14px}
+#topButtons{top:auto;bottom:178px;right:10px;max-width:170px}
+.smallButton{padding:7px 9px;font-size:12px}
+}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div id="stats">
+<div id="zoneName">Заброшенная шахта</div>
+<div>Монеты: <b id="coins">0</b></div>
+<div>Кристаллы: <b id="gems">0</b></div>
+<div>Рюкзак: <b id="bag">0 / 20</b></div>
+<div id="capacityBar"><div id="capacityFill"></div></div>
+<div>Сила: <b id="power">1</b> | Множитель: <b id="multi">×1.00</b></div>
+</div>
+
+<div id="topButtons">
+<button class="smallButton" id="shopButton">УЛУЧШЕНИЯ</button>
+<button class="smallButton" id="sellButton">ПРОДАТЬ</button>
+<button class="smallButton" id="breakButton">ПРОРЫВ</button>
+</div>
+
+<div id="message"></div>
+
+<div id="panel">
+<button id="panelClose">✕</button>
+<h2>Улучшения</h2>
+<div id="upgradeList"></div>
+</div>
+
+<div id="joystick"><div id="stick"></div></div>
+
+<div id="mobileActions">
+<button class="action" id="mineButton">ДОБЫВАТЬ</button>
+<button class="action" id="sellMobile">ПРОДАТЬ</button>
+<button class="action" id="shopMobile">МАГАЗИН</button>
+</div>
+
+<div id="hint">WASD — движение · E или ЛКМ — добывать · подойди к лифту, чтобы перейти глубже</div>
+
+<script>
+"use strict";
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const $ = id => document.getElementById(id);
+
+const ZONES = [
+  {name:"Заброшенная шахта", color:"#4f463b", floor:"#272521", ore:"#a9b3bd", value:2, hp:5, unlock:0},
+  {name:"Грибные пещеры", color:"#47345c", floor:"#241d2b", ore:"#da71ff", value:7, hp:18, unlock:750},
+  {name:"Ледяная бездна", color:"#31536b", floor:"#182b38", ore:"#84eaff", value:22, hp:55, unlock:6000},
+  {name:"Магматическое ядро", color:"#6b3022", floor:"#301612", ore:"#ff7145", value:70, hp:170, unlock:45000},
+  {name:"Кристаллический мир", color:"#28564e", floor:"#142c29", ore:"#60ffd0", value:220, hp:520, unlock:300000},
+  {name:"Пустота", color:"#251d39", floor:"#0d0a14", ore:"#e1c2ff", value:750, hp:1600, unlock:2000000}
+];
+
+const WORLD_W = 4800;
+const WORLD_H = 900;
+const ZONE_W = WORLD_W / ZONES.length;
+const SAVE_KEY = "glubzhe_nulya_save_v1";
+
+let state = {
+  coins:0,
+  gems:0,
+  ore:0,
+  oreValue:0,
+  powerLevel:1,
+  bagLevel:1,
+  speedLevel:1,
+  critLevel:1,
+  luckLevel:1,
+  autoLevel:0,
+  breakthroughs:0,
+  maxZone:0,
+  totalEarned:0
+};
+
+let player = {x:170,y:WORLD_H/2,r:17,dir:0};
+let camera = {x:0,y:0};
+let nodes = [];
+let particles = [];
+let keys = {};
+let joy = {x:0,y:0,active:false};
+let mining = false;
+let lastTime = performance.now();
+let autoTimer = 0;
+let messageTimer = 0;
+
+function power(){return state.powerLevel * (1 + state.breakthroughs * .5)}
+function capacity(){return 20 + (state.bagLevel-1)*20}
+function speed(){return 190 + (state.speedLevel-1)*18}
+function critChance(){return Math.min(.5,.05+(state.critLevel-1)*.025)}
+function luck(){return 1+(state.luckLevel-1)*.08}
+function multiplier(){return (1+state.breakthroughs*.5)*luck()}
+function zoneAt(x){return Math.max(0,Math.min(ZONES.length-1,Math.floor(x/ZONE_W)))}
+function fmt(n){
+  if(n<1000)return Math.floor(n).toString();
+  const units=["K","M","B","T"];
+  let i=-1;
+  while(n>=1000&&i<units.length-1){n/=1000;i++}
+  return n.toFixed(n>=100?0:n>=10?1:2)+units[i];
+}
+
+function resize(){
+  const dpr=Math.min(devicePixelRatio||1,2);
+  canvas.width=Math.floor(innerWidth*dpr);
+  canvas.height=Math.floor(innerHeight*dpr);
+  canvas.style.width=innerWidth+"px";
+  canvas.style.height=innerHeight+"px";
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+}
+addEventListener("resize",resize);
+resize();
+
+function createNodes(){
+  nodes=[];
+  let seed=87341;
+  const random=()=>{
+    seed=(seed*16807)%2147483647;
+    return (seed-1)/2147483646;
+  };
+  for(let z=0;z<ZONES.length;z++){
+    for(let i=0;i<24;i++){
+      const x=z*ZONE_W+100+random()*(ZONE_W-200);
+      const y=100+random()*(WORLD_H-200);
+      const size=16+random()*13;
+      nodes.push({
+        x,y,size,zone:z,
+        hp:ZONES[z].hp,
+        maxHp:ZONES[z].hp,
+        alive:true,
+        respawn:0,
+        phase:random()*6.28
+      });
+    }
+  }
+}
+createNodes();
+
+function save(){
+  try{
+    localStorage.setItem(SAVE_KEY,JSON.stringify({
+      state,
+      player:{x:player.x,y:player.y}
+    }));
+  }catch(e){}
+}
+
+function load(){
+  try{
+    const data=JSON.parse(localStorage.getItem(SAVE_KEY));
+    if(data&&data.state){
+      Object.assign(state,data.state);
+      if(data.player){
+        player.x=Math.max(80,Math.min(WORLD_W-80,data.player.x||170));
+        player.y=Math.max(70,Math.min(WORLD_H-70,data.player.y||WORLD_H/2));
+      }
+    }
+  }catch(e){}
+}
+load();
+setInterval(save,5000);
+addEventListener("beforeunload",save);
+
+function showMessage(text,color="#fff"){
+  const el=$("message");
+  el.textContent=text;
+  el.style.color=color;
+  el.style.opacity="1";
+  clearTimeout(messageTimer);
+  messageTimer=setTimeout(()=>el.style.opacity="0",1700);
+}
+
+function updateUI(){
+  const z=zoneAt(player.x);
+  $("zoneName").textContent=ZONES[z].name;
+  $("coins").textContent=fmt(state.coins);
+  $("gems").textContent=fmt(state.gems);
+  $("bag").textContent=fmt(state.ore)+" / "+fmt(capacity());
+  $("power").textContent=fmt(power());
+  $("multi").textContent="×"+multiplier().toFixed(2);
+  $("capacityFill").style.width=Math.min(100,state.ore/capacity()*100)+"%";
+  $("capacityFill").style.background=state.ore>=capacity()?"#ff5e5e":"#56e18d";
+}
+
+const upgradeData=[
+  {key:"powerLevel",name:"Сила кирки",description:"Больше урона по залежам.",base:35,growth:1.72},
+  {key:"bagLevel",name:"Вместимость рюкзака",description:"+20 мест для руды.",base:60,growth:1.8},
+  {key:"speedLevel",name:"Скорость движения",description:"Быстрее исследуй шахту.",base:90,growth:1.85},
+  {key:"critLevel",name:"Критический удар",description:"Шанс нанести тройной урон.",base:150,growth:1.95},
+  {key:"luckLevel",name:"Удача",description:"Повышает стоимость добычи.",base:250,growth:2.05},
+  {key:"autoLevel",name:"Автодобыча",description:"Автоматически бьёт ближайшую залежь.",base:1000,growth:2.4}
+];
+
+function upgradeCost(u){
+  const level=state[u.key];
+  return Math.floor(u.base*Math.pow(u.growth,level-(u.key==="autoLevel"?0:1)));
+}
+
+function renderShop(){
+  const list=$("upgradeList");
+  list.innerHTML="";
+  upgradeData.forEach(u=>{
+    const cost=upgradeCost(u);
+    const level=state[u.key];
+    const div=document.createElement("div");
+    div.className="upgrade";
+    div.innerHTML=`
+      <div><b>${u.name}</b><br><small>${u.description}<br>Уровень: ${level}</small></div>
+      <button ${state.coins<cost?"disabled":""}>${fmt(cost)} монет</button>`;
+    div.querySelector("button").onclick=()=>{
+      if(state.coins<cost)return;
+      state.coins-=cost;
+      state[u.key]++;
+      renderShop();
+      updateUI();
+      save();
+    };
+    list.appendChild(div);
+  });
+}
+
+function openShop(){
+  renderShop();
+  $("panel").style.display="block";
+}
+function closeShop(){$("panel").style.display="none"}
+$("shopButton").onclick=openShop;
+$("shopMobile").onclick=openShop;
+$("panelClose").onclick=closeShop;
+
+function sell(){
+  if(state.ore<=0){
+    showMessage("Рюкзак пуст","#ffcf70");
+    return;
+  }
+  const earned=Math.floor(state.oreValue*multiplier());
+  state.coins+=earned;
+  state.totalEarned+=earned;
+  state.ore=0;
+  state.oreValue=0;
+  showMessage("Продано: +"+fmt(earned)+" монет","#70ff9e");
+  updateUI();
+  save();
+}
+$("sellButton").onclick=sell;
+$("sellMobile").onclick=sell;
+
+function breakthrough(){
+  const needed=250000*Math.pow(4,state.breakthroughs);
+  if(state.totalEarned<needed){
+    showMessage("Для прорыва нужно заработать "+fmt(needed)+" монет","#ffcf70");
+    return;
+  }
+  if(!confirm("Совершить Прорыв? Монеты и улучшения сбросятся, но множитель добычи навсегда увеличится."))return;
+  state.breakthroughs++;
+  const keptGems=state.gems+10*state.breakthroughs;
+  state={
+    coins:0,gems:keptGems,ore:0,oreValue:0,
+    powerLevel:1,bagLevel:1,speedLevel:1,critLevel:1,
+    luckLevel:1,autoLevel:0,breakthroughs:state.breakthroughs,
+    maxZone:0,totalEarned:0
+  };
+  player.x=170;
+  player.y=WORLD_H/2;
+  createNodes();
+  showMessage("ПРОРЫВ! Множитель увеличен.","#dba7ff");
+  updateUI();
+  save();
+}
+$("breakButton").onclick=breakthrough;
+
+addEventListener("keydown",e=>{
+  keys[e.key.toLowerCase()]=true;
+  if(["arrowup","arrowdown","arrowleft","arrowright"," "].includes(e.key.toLowerCase()))e.preventDefault();
+  if(e.key.toLowerCase()==="e"||e.key===" ")mineNearest();
+});
+addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
+
+canvas.addEventListener("pointerdown",e=>{
+  if(e.pointerType==="touch")return;
+  const wx=e.clientX+camera.x;
+  const wy=e.clientY+camera.y;
+  let target=null,dist=Infinity;
+  for(const n of nodes){
+    if(!n.alive)continue;
+    const d=Math.hypot(n.x-wx,n.y-wy);
+    if(d<n.size+25&&d<dist){target=n;dist=d}
+  }
+  if(target&&Math.hypot(target.x-player.x,target.y-player.y)<105)hitNode(target);
+  else mineNearest();
+});
+
+const joyBase=$("joystick");
+const stick=$("stick");
+function updateJoy(e){
+  const r=joyBase.getBoundingClientRect();
+  let x=e.clientX-(r.left+r.width/2);
+  let y=e.clientY-(r.top+r.height/2);
+  const max=42;
+  const len=Math.hypot(x,y)||1;
+  if(len>max){x=x/len*max;y=y/len*max}
+  joy.x=x/max;
+  joy.y=y/max;
+  stick.style.transform=`translate(${x}px,${y}px)`;
+}
+joyBase.addEventListener("pointerdown",e=>{
+  joy.active=true;
+  joyBase.setPointerCapture(e.pointerId);
+  updateJoy(e);
+});
+joyBase.addEventListener("pointermove",e=>{if(joy.active)updateJoy(e)});
+function endJoy(){
+  joy.active=false;joy.x=joy.y=0;
+  stick.style.transform="translate(0,0)";
+}
+joyBase.addEventListener("pointerup",endJoy);
+joyBase.addEventListener("pointercancel",endJoy);
+
+$("mineButton").addEventListener("pointerdown",e=>{
+  e.preventDefault();mining=true;mineNearest();
+});
+$("mineButton").addEventListener("pointerup",()=>mining=false);
+$("mineButton").addEventListener("pointercancel",()=>mining=false);
+
+function nearestNode(){
+  let best=null,bestD=100;
+  for(const n of nodes){
+    if(!n.alive)continue;
+    const d=Math.hypot(n.x-player.x,n.y-player.y);
+    if(d<bestD){best=n;bestD=d}
+  }
+  return best;
+}
+
+function mineNearest(){
+  if(state.ore>=capacity()){
+    showMessage("Рюкзак заполнен! Продай руду.","#ffcb70");
+    return;
+  }
+  const n=nearestNode();
+  if(!n){
+    showMessage("Подойди ближе к залежи","#ddd");
+    return;
+  }
+  hitNode(n);
+}
+
+function hitNode(n){
+  let damage=power();
+  const critical=Math.random()<critChance();
+  if(critical)damage*=3;
+  n.hp-=damage;
+  player.dir=Math.atan2(n.y-player.y,n.x-player.x);
+  for(let i=0;i<7;i++){
+    particles.push({
+      x:n.x,y:n.y,
+      vx:(Math.random()-.5)*150,
+      vy:(Math.random()-.5)*150,
+      life:.45+Math.random()*.25,
+      color:ZONES[n.zone].ore
+    });
+  }
+  if(critical)showMessage("КРИТИЧЕСКИЙ УДАР!","#ffe46b");
+  if(n.hp<=0)breakNode(n);
+}
+
+function breakNode(n){
+  n.alive=false;
+  n.respawn=4+Math.random()*5;
+  const free=capacity()-state.ore;
+  const amount=Math.min(free,1+Math.floor(Math.random()*3));
+  const value=amount*ZONES[n.zone].value;
+  state.ore+=amount;
+  state.oreValue+=value;
+  if(Math.random()<.018+.004*state.luckLevel){
+    state.gems++;
+    showMessage("Найден редкий кристалл!","#d680ff");
+  }
+  if(state.ore>=capacity())showMessage("Рюкзак заполнен!","#ffcb70");
+  updateUI();
+}
+
+function tryPassGate(oldX,newX){
+  for(let i=1;i<ZONES.length;i++){
+    const gateX=i*ZONE_W;
+    if(oldX<gateX&&newX>=gateX){
+      if(state.maxZone<i){
+        const cost=ZONES[i].unlock;
+        if(state.coins<cost){
+          showMessage("Нужно "+fmt(cost)+" монет для открытия прохода","#ffcf70");
+          return gateX-35;
+        }
+        state.coins-=cost;
+        state.maxZone=i;
+        showMessage("Открыта локация: "+ZONES[i].name,"#79eaff");
+        save();
+      }
+    }
+  }
+  return newX;
+}
+
+function update(dt){
+  let dx=0,dy=0;
+  if(keys.w||keys.arrowup)dy--;
+  if(keys.s||keys.arrowdown)dy++;
+  if(keys.a||keys.arrowleft)dx--;
+  if(keys.d||keys.arrowright)dx++;
+  dx+=joy.x;dy+=joy.y;
+  const length=Math.hypot(dx,dy);
+  if(length>.05){
+    dx/=Math.max(1,length);
+    dy/=Math.max(1,length);
+    const oldX=player.x;
+    let nx=player.x+dx*speed()*dt;
+    nx=tryPassGate(oldX,nx);
+    player.x=Math.max(40,Math.min(WORLD_W-40,nx));
+    player.y=Math.max(45,Math.min(WORLD_H-45,player.y+dy*speed()*dt));
+    player.dir=Math.atan2(dy,dx);
+  }
+
+  for(const n of nodes){
+    if(!n.alive){
+      n.respawn-=dt;
+      if(n.respawn<=0){n.alive=true;n.hp=n.maxHp}
+    }
+  }
+
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];
+    p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;
+    p.vx*=.94;p.vy*=.94;
+    if(p.life<=0)particles.splice(i,1);
+  }
+
+  autoTimer-=dt;
+  if(state.autoLevel>0&&autoTimer<=0){
+    const n=nearestNode();
+    if(n)hitNode(n);
+    autoTimer=Math.max(.16,1.2-state.autoLevel*.09);
+  }
+  if(mining&&autoTimer<=.08)mineNearest();
+
+  const targetX=player.x-innerWidth/2;
+  const targetY=player.y-innerHeight/2;
+  camera.x+=(targetX-camera.x)*Math.min(1,dt*6);
+  camera.y+=(targetY-camera.y)*Math.min(1,dt*6);
+  camera.x=Math.max(0,Math.min(WORLD_W-innerWidth,camera.x));
+  camera.y=Math.max(0,Math.min(WORLD_H-innerHeight,camera.y));
+  updateUI();
+}
+
+function drawCrystal(x,y,size,color,hpRatio,phase){
+  ctx.save();
+  ctx.translate(x,y);
+  const pulse=1+Math.sin(performance.now()/500+phase)*.035;
+  ctx.scale(pulse,pulse);
+  ctx.shadowBlur=18;
+  ctx.shadowColor=color;
+  ctx.fillStyle=color;
+  ctx.beginPath();
+  ctx.moveTo(0,-size);
+  ctx.lineTo(size*.72,-size*.2);
+  ctx.lineTo(size*.55,size*.75);
+  ctx.lineTo(-size*.5,size);
+  ctx.lineTo(-size*.8,-size*.12);
+  ctx.closePath();
+  ctx.fill();
+  ctx.shadowBlur=0;
+  ctx.fillStyle="rgba(255,255,255,.45)";
+  ctx.beginPath();
+  ctx.moveTo(0,-size*.8);
+  ctx.lineTo(size*.2,-size*.2);
+  ctx.lineTo(-size*.25,size*.45);
+  ctx.closePath();
+  ctx.fill();
+  if(hpRatio<1){
+    ctx.fillStyle="#1a1a1a";
+    ctx.fillRect(-size,-size-12,size*2,5);
+    ctx.fillStyle="#74ff91";
+    ctx.fillRect(-size,-size-12,size*2*Math.max(0,hpRatio),5);
+  }
+  ctx.restore();
+}
+
+function draw(){
+  ctx.clearRect(0,0,innerWidth,innerHeight);
+  ctx.save();
+  ctx.translate(-camera.x,-camera.y);
+
+  for(let z=0;z<ZONES.length;z++){
+    const x=z*ZONE_W;
+    ctx.fillStyle=ZONES[z].floor;
+    ctx.fillRect(x,0,ZONE_W,WORLD_H);
+
+    ctx.globalAlpha=.16;
+    ctx.strokeStyle=ZONES[z].color;
+    ctx.lineWidth=2;
+    for(let gx=x;gx<x+ZONE_W;gx+=80){
+      ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,WORLD_H);ctx.stroke();
+    }
+    for(let gy=0;gy<WORLD_H;gy+=80){
+      ctx.beginPath();ctx.moveTo(x,gy);ctx.lineTo(x+ZONE_W,gy);ctx.stroke();
+    }
+    ctx.globalAlpha=1;
+
+    ctx.fillStyle=ZONES[z].color;
+    for(let i=0;i<10;i++){
+      const px=x+70+((i*173+z*91)%(ZONE_W-140));
+      const py=80+((i*257+z*113)%(WORLD_H-160));
+      ctx.beginPath();
+      ctx.arc(px,py,22+(i%3)*10,0,Math.PI*2);
+      ctx.globalAlpha=.18;
+      ctx.fill();
+    }
+    ctx.globalAlpha=1;
+
+    ctx.fillStyle="rgba(255,255,255,.12)";
+    ctx.font="bold 30px Arial";
+    ctx.textAlign="center";
+    ctx.fillText(ZONES[z].name,x+ZONE_W/2,55);
+  }
+
+  for(let i=1;i<ZONES.length;i++){
+    const x=i*ZONE_W;
+    const unlocked=state.maxZone>=i;
+    ctx.fillStyle=unlocked?"rgba(87,255,160,.22)":"rgba(255,70,70,.3)";
+    ctx.fillRect(x-12,0,24,WORLD_H);
+    ctx.strokeStyle=unlocked?"#5dffa2":"#ff5757";
+    ctx.lineWidth=4;
+    ctx.setLineDash([18,12]);
+    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,WORLD_H);ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle="#fff";
+    ctx.font="bold 15px Arial";
+    ctx.textAlign="center";
+    ctx.fillText(unlocked?"ПРОХОД ОТКРЫТ":"ОТКРЫТЬ: "+fmt(ZONES[i].unlock)+" МОНЕТ",x,90);
+  }
+
+  for(const n of nodes){
+    if(n.alive)drawCrystal(n.x,n.y,n.size,ZONES[n.zone].ore,n.hp/n.maxHp,n.phase);
+  }
+
+  for(const p of particles){
+    ctx.globalAlpha=Math.max(0,p.life*2);
+    ctx.fillStyle=p.color;
+    ctx.fillRect(p.x-3,p.y-3,6,6);
+  }
+  ctx.globalAlpha=1;
+
+  ctx.save();
+  ctx.translate(player.x,player.y);
+  ctx.rotate(player.dir);
+  ctx.shadowBlur=18;
+  ctx.shadowColor="#69cfff";
+  ctx.fillStyle="#62bff0";
+  ctx.beginPath();ctx.arc(0,0,player.r,0,Math.PI*2);ctx.fill();
+  ctx.shadowBlur=0;
+  ctx.fillStyle="#dff6ff";
+  ctx.beginPath();
+  ctx.moveTo(player.r+10,0);
+  ctx.lineTo(player.r-3,-7);
+  ctx.lineTo(player.r-3,7);
+  ctx.closePath();ctx.fill();
+  ctx.restore();
+
+  const near=nearestNode();
+  if(near){
+    ctx.strokeStyle="rgba(255,255,255,.75)";
+    ctx.lineWidth=2;
+    ctx.setLineDash([5,5]);
+    ctx.beginPath();
+    ctx.arc(near.x,near.y,near.size+9,0,Math.PI*2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  ctx.restore();
+
+  const gradient=ctx.createRadialGradient(
+    innerWidth/2,innerHeight/2,Math.min(innerWidth,innerHeight)*.25,
+    innerWidth/2,innerHeight/2,Math.max(innerWidth,innerHeight)*.75
+  );
+  gradient.addColorStop(0,"rgba(0,0,0,0)");
+  gradient.addColorStop(1,"rgba(0,0,0,.48)");
+  ctx.fillStyle=gradient;
+  ctx.fillRect(0,0,innerWidth,innerHeight);
+}
+
+function loop(now){
+  const dt=Math.min(.04,(now-lastTime)/1000);
+  lastTime=now;
+  update(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+
+updateUI();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
