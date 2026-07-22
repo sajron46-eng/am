@@ -6,114 +6,209 @@
 <title>Глубже нуля</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080b10;color:#fff;font-family:Arial,sans-serif;touch-action:none}
-button{font:inherit;color:#fff;border:0;cursor:pointer}
+html,body{
+  margin:0;width:100%;height:100%;overflow:hidden;
+  background:#080b10;color:#fff;font-family:Arial,sans-serif;
+  touch-action:none
+}
+button,input{font:inherit}
+button{color:#fff;border:0;cursor:pointer}
 #game{display:block;width:100%;height:100%;background:#111}
+
 #stats{
-position:fixed;left:10px;top:10px;z-index:5;
-background:rgba(5,8,14,.88);padding:10px 12px;border:1px solid #394252;
-border-radius:12px;min-width:205px;font-size:14px;line-height:1.45;
-box-shadow:0 5px 18px #0008;pointer-events:none
+  position:fixed;left:10px;top:10px;z-index:5;
+  background:rgba(5,8,14,.88);padding:10px 12px;
+  border:1px solid #394252;border-radius:12px;
+  min-width:205px;font-size:14px;line-height:1.45;
+  box-shadow:0 5px 18px #0008;pointer-events:none
 }
 #zoneName{font-weight:bold;color:#76d9ff;font-size:16px}
-#capacityBar{height:7px;background:#252c38;border-radius:10px;overflow:hidden;margin-top:4px}
-#capacityFill{height:100%;width:0;background:#56e18d}
-#message{
-position:fixed;top:18%;left:50%;transform:translateX(-50%);z-index:7;
-background:rgba(0,0,0,.75);padding:10px 16px;border-radius:10px;
-font-weight:bold;opacity:0;transition:opacity .25s;pointer-events:none;text-align:center
+#capacityBar{
+  height:7px;background:#252c38;border-radius:10px;
+  overflow:hidden;margin-top:4px
 }
-#topButtons{position:fixed;right:10px;top:10px;z-index:6;display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end;max-width:52%}
+#capacityFill{height:100%;width:0;background:#56e18d}
+
+#message{
+  position:fixed;top:18%;left:50%;transform:translateX(-50%);
+  z-index:20;background:rgba(0,0,0,.82);padding:10px 16px;
+  border-radius:10px;font-weight:bold;opacity:0;
+  transition:opacity .25s;pointer-events:none;text-align:center
+}
+
+#topButtons{
+  position:fixed;right:10px;top:10px;z-index:6;
+  display:flex;gap:7px;flex-wrap:wrap;
+  justify-content:flex-end;max-width:58%
+}
 .smallButton{
-background:#263247;border:1px solid #52647e;border-radius:10px;
-padding:9px 12px;font-weight:bold;box-shadow:0 3px 8px #0007
+  background:#263247;border:1px solid #52647e;
+  border-radius:10px;padding:9px 12px;font-weight:bold;
+  box-shadow:0 3px 8px #0007
 }
 .smallButton:active{transform:scale(.96)}
-#panel{
-position:fixed;z-index:10;left:50%;top:50%;transform:translate(-50%,-50%);
-width:min(94vw,620px);max-height:84vh;overflow:auto;background:#111722;
-border:2px solid #445169;border-radius:16px;padding:15px;display:none;
-box-shadow:0 16px 45px #000
+.saveButton{background:#285f4a;border-color:#55a882}
+.copyButton{background:#574382;border-color:#8d75c5}
+
+.panel{
+  position:fixed;z-index:15;left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  width:min(94vw,620px);max-height:84vh;overflow:auto;
+  background:#111722;border:2px solid #445169;
+  border-radius:16px;padding:15px;display:none;
+  box-shadow:0 16px 45px #000
 }
-#panel h2{margin:0 0 12px;color:#7cddff}
-#panelClose{position:absolute;right:10px;top:10px;background:#7d3030;border-radius:8px;padding:7px 11px}
+.panel h2{margin:0 42px 12px 0;color:#7cddff}
+.panelClose{
+  position:absolute;right:10px;top:10px;
+  background:#7d3030;border-radius:8px;padding:7px 11px
+}
+
 .upgrade{
-display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;
-background:#1c2533;border:1px solid #35445a;border-radius:11px;padding:11px;margin:8px 0
+  display:grid;grid-template-columns:1fr auto;
+  gap:8px;align-items:center;background:#1c2533;
+  border:1px solid #35445a;border-radius:11px;
+  padding:11px;margin:8px 0
 }
 .upgrade b{color:#f4d875}
-.upgrade button{background:#2879ad;border-radius:8px;padding:9px 12px;font-weight:bold}
+.upgrade button{
+  background:#2879ad;border-radius:8px;
+  padding:9px 12px;font-weight:bold
+}
 .upgrade button:disabled{background:#3c4149;color:#888}
+
+.saveInfo{
+  color:#b9c8dc;font-size:14px;line-height:1.45;
+  margin-bottom:10px
+}
+#saveCode{
+  width:100%;min-height:105px;resize:vertical;
+  background:#090d14;color:#8dffb5;border:1px solid #42526b;
+  border-radius:10px;padding:10px;font-family:monospace;
+  font-size:12px;word-break:break-all
+}
+.saveActions{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:8px;margin-top:10px
+}
+.saveActions button{
+  min-height:44px;background:#2879ad;
+  border-radius:9px;padding:9px;font-weight:bold
+}
+#loadCodeButton{background:#9b6726}
+#generateCodeButton{background:#28734e}
+#copyCodePanelButton{background:#604b91}
+
 #joystick{
-position:fixed;left:20px;bottom:22px;width:126px;height:126px;border-radius:50%;
-background:rgba(42,52,68,.5);border:2px solid rgba(160,185,220,.4);
-z-index:8;display:none;touch-action:none
+  position:fixed;left:20px;bottom:22px;width:126px;height:126px;
+  border-radius:50%;background:rgba(42,52,68,.5);
+  border:2px solid rgba(160,185,220,.4);
+  z-index:8;display:none;touch-action:none
 }
 #stick{
-position:absolute;width:54px;height:54px;left:34px;top:34px;border-radius:50%;
-background:rgba(126,199,255,.8);border:2px solid #d8f2ff
+  position:absolute;width:54px;height:54px;left:34px;top:34px;
+  border-radius:50%;background:rgba(126,199,255,.8);
+  border:2px solid #d8f2ff
 }
 #mobileActions{
-position:fixed;right:18px;bottom:20px;z-index:8;display:none;
-grid-template-columns:78px 78px;gap:10px
+  position:fixed;right:18px;bottom:20px;z-index:8;
+  display:none;grid-template-columns:78px 78px;gap:10px
 }
 .action{
-height:68px;border-radius:50%;font-weight:bold;font-size:13px;
-background:rgba(35,125,174,.82);border:2px solid #a2e3ff;
-box-shadow:0 5px 13px #0008;touch-action:none
+  height:68px;border-radius:50%;font-weight:bold;font-size:13px;
+  background:rgba(35,125,174,.82);border:2px solid #a2e3ff;
+  box-shadow:0 5px 13px #0008;touch-action:none
 }
 .action:active{transform:scale(.94);background:#49a9d8}
-#mineButton{grid-row:1/3;height:148px;border-radius:28px;background:rgba(200,117,35,.88);border-color:#ffd08a}
-#hint{
-position:fixed;left:50%;bottom:14px;transform:translateX(-50%);
-z-index:5;background:rgba(0,0,0,.66);padding:7px 12px;border-radius:8px;
-font-size:13px;pointer-events:none;white-space:nowrap
+#mineButton{
+  grid-row:1/3;height:148px;border-radius:28px;
+  background:rgba(200,117,35,.88);border-color:#ffd08a
 }
+#hint{
+  position:fixed;left:50%;bottom:14px;transform:translateX(-50%);
+  z-index:5;background:rgba(0,0,0,.66);padding:7px 12px;
+  border-radius:8px;font-size:13px;pointer-events:none;
+  white-space:nowrap
+}
+
 @media(pointer:coarse),(max-width:800px){
-#joystick,#mobileActions{display:grid}
-#hint{display:none}
-#stats{font-size:12px;min-width:170px;padding:8px}
-#zoneName{font-size:14px}
-#topButtons{top:auto;bottom:178px;right:10px;max-width:170px}
-.smallButton{padding:7px 9px;font-size:12px}
+  #joystick,#mobileActions{display:grid}
+  #hint{display:none}
+  #stats{font-size:12px;min-width:170px;padding:8px}
+  #zoneName{font-size:14px}
+  #topButtons{
+    top:auto;bottom:178px;right:10px;
+    max-width:190px;max-height:145px;overflow:auto
+  }
+  .smallButton{padding:7px 9px;font-size:11px}
+  .saveActions{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
+
 <canvas id="game"></canvas>
 
 <div id="stats">
-<div id="zoneName">Заброшенная шахта</div>
-<div>Монеты: <b id="coins">0</b></div>
-<div>Кристаллы: <b id="gems">0</b></div>
-<div>Рюкзак: <b id="bag">0 / 20</b></div>
-<div id="capacityBar"><div id="capacityFill"></div></div>
-<div>Сила: <b id="power">1</b> | Множитель: <b id="multi">×1.00</b></div>
+  <div id="zoneName">Заброшенная шахта</div>
+  <div>Монеты: <b id="coins">0</b></div>
+  <div>Кристаллы: <b id="gems">0</b></div>
+  <div>Рюкзак: <b id="bag">0 / 20</b></div>
+  <div id="capacityBar"><div id="capacityFill"></div></div>
+  <div>Сила: <b id="power">1</b> | Множитель: <b id="multi">×1.00</b></div>
 </div>
 
 <div id="topButtons">
-<button class="smallButton" id="shopButton">УЛУЧШЕНИЯ</button>
-<button class="smallButton" id="sellButton">ПРОДАТЬ</button>
-<button class="smallButton" id="breakButton">ПРОРЫВ</button>
+  <button class="smallButton" id="shopButton">УЛУЧШЕНИЯ</button>
+  <button class="smallButton" id="sellButton">ПРОДАТЬ</button>
+  <button class="smallButton" id="breakButton">ПРОРЫВ</button>
+  <button class="smallButton saveButton" id="saveButton">СОХРАНИТЬ</button>
+  <button class="smallButton copyButton" id="copySaveButton">СКОПИРОВАТЬ НОМЕР СОХРАНЕНИЯ</button>
+  <button class="smallButton" id="openSaveButton">ВВЕСТИ НОМЕР</button>
 </div>
 
 <div id="message"></div>
 
-<div id="panel">
-<button id="panelClose">✕</button>
-<h2>Улучшения</h2>
-<div id="upgradeList"></div>
+<div class="panel" id="shopPanel">
+  <button class="panelClose" id="shopClose">✕</button>
+  <h2>Улучшения</h2>
+  <div id="upgradeList"></div>
+</div>
+
+<div class="panel" id="savePanel">
+  <button class="panelClose" id="saveClose">✕</button>
+  <h2>Номер сохранения</h2>
+
+  <div class="saveInfo">
+    Нажми «Создать номер», скопируй его и сохрани. Этот номер можно
+    отправить другому игроку, чтобы он загрузил твоё сохранение.
+  </div>
+
+  <textarea
+    id="saveCode"
+    spellcheck="false"
+    autocomplete="off"
+    placeholder="Здесь появится номер сохранения. Также сюда можно вставить номер другого игрока."
+  ></textarea>
+
+  <div class="saveActions">
+    <button id="generateCodeButton">СОЗДАТЬ НОМЕР</button>
+    <button id="copyCodePanelButton">СКОПИРОВАТЬ НОМЕР</button>
+    <button id="loadCodeButton">ЗАГРУЗИТЬ СОХРАНЕНИЕ</button>
+  </div>
 </div>
 
 <div id="joystick"><div id="stick"></div></div>
 
 <div id="mobileActions">
-<button class="action" id="mineButton">ДОБЫВАТЬ</button>
-<button class="action" id="sellMobile">ПРОДАТЬ</button>
-<button class="action" id="shopMobile">МАГАЗИН</button>
+  <button class="action" id="mineButton">ДОБЫВАТЬ</button>
+  <button class="action" id="sellMobile">ПРОДАТЬ</button>
+  <button class="action" id="shopMobile">МАГАЗИН</button>
 </div>
 
-<div id="hint">WASD — движение · E или ЛКМ — добывать · подойди к лифту, чтобы перейти глубже</div>
+<div id="hint">
+  WASD — движение · E или ЛКМ — добывать · подойди к проходу, чтобы перейти глубже
+</div>
 
 <script>
 "use strict";
@@ -123,35 +218,39 @@ const ctx = canvas.getContext("2d");
 const $ = id => document.getElementById(id);
 
 const ZONES = [
-  {name:"Заброшенная шахта", color:"#4f463b", floor:"#272521", ore:"#a9b3bd", value:2, hp:5, unlock:0},
-  {name:"Грибные пещеры", color:"#47345c", floor:"#241d2b", ore:"#da71ff", value:7, hp:18, unlock:750},
-  {name:"Ледяная бездна", color:"#31536b", floor:"#182b38", ore:"#84eaff", value:22, hp:55, unlock:6000},
-  {name:"Магматическое ядро", color:"#6b3022", floor:"#301612", ore:"#ff7145", value:70, hp:170, unlock:45000},
-  {name:"Кристаллический мир", color:"#28564e", floor:"#142c29", ore:"#60ffd0", value:220, hp:520, unlock:300000},
-  {name:"Пустота", color:"#251d39", floor:"#0d0a14", ore:"#e1c2ff", value:750, hp:1600, unlock:2000000}
+  {name:"Заброшенная шахта",color:"#4f463b",floor:"#272521",ore:"#a9b3bd",value:2,hp:5,unlock:0},
+  {name:"Грибные пещеры",color:"#47345c",floor:"#241d2b",ore:"#da71ff",value:7,hp:18,unlock:750},
+  {name:"Ледяная бездна",color:"#31536b",floor:"#182b38",ore:"#84eaff",value:22,hp:55,unlock:6000},
+  {name:"Магматическое ядро",color:"#6b3022",floor:"#301612",ore:"#ff7145",value:70,hp:170,unlock:45000},
+  {name:"Кристаллический мир",color:"#28564e",floor:"#142c29",ore:"#60ffd0",value:220,hp:520,unlock:300000},
+  {name:"Пустота",color:"#251d39",floor:"#0d0a14",ore:"#e1c2ff",value:750,hp:1600,unlock:2000000}
 ];
 
 const WORLD_W = 4800;
 const WORLD_H = 900;
 const ZONE_W = WORLD_W / ZONES.length;
-const SAVE_KEY = "glubzhe_nulya_save_v1";
+const SAVE_KEY = "glubzhe_nulya_save_v2";
+const SAVE_PREFIX = "GN2";
 
-let state = {
-  coins:0,
-  gems:0,
-  ore:0,
-  oreValue:0,
-  powerLevel:1,
-  bagLevel:1,
-  speedLevel:1,
-  critLevel:1,
-  luckLevel:1,
-  autoLevel:0,
-  breakthroughs:0,
-  maxZone:0,
-  totalEarned:0
-};
+function defaultState(){
+  return {
+    coins:0,
+    gems:0,
+    ore:0,
+    oreValue:0,
+    powerLevel:1,
+    bagLevel:1,
+    speedLevel:1,
+    critLevel:1,
+    luckLevel:1,
+    autoLevel:0,
+    breakthroughs:0,
+    maxZone:0,
+    totalEarned:0
+  };
+}
 
+let state = defaultState();
 let player = {x:170,y:WORLD_H/2,r:17,dir:0};
 let camera = {x:0,y:0};
 let nodes = [];
@@ -161,403 +260,894 @@ let joy = {x:0,y:0,active:false};
 let mining = false;
 let lastTime = performance.now();
 let autoTimer = 0;
+let miningTimer = 0;
 let messageTimer = 0;
+let latestSaveCode = "";
 
-function power(){return state.powerLevel * (1 + state.breakthroughs * .5)}
-function capacity(){return 20 + (state.bagLevel-1)*20}
-function speed(){return 190 + (state.speedLevel-1)*18}
-function critChance(){return Math.min(.5,.05+(state.critLevel-1)*.025)}
-function luck(){return 1+(state.luckLevel-1)*.08}
-function multiplier(){return (1+state.breakthroughs*.5)*luck()}
-function zoneAt(x){return Math.max(0,Math.min(ZONES.length-1,Math.floor(x/ZONE_W)))}
+function power(){
+  return state.powerLevel * (1 + state.breakthroughs * .5);
+}
+function capacity(){
+  return 20 + (state.bagLevel - 1) * 20;
+}
+function speed(){
+  return 190 + (state.speedLevel - 1) * 18;
+}
+function critChance(){
+  return Math.min(.5,.05 + (state.critLevel - 1) * .025);
+}
+function luck(){
+  return 1 + (state.luckLevel - 1) * .08;
+}
+function multiplier(){
+  return (1 + state.breakthroughs * .5) * luck();
+}
+function zoneAt(x){
+  return Math.max(0,Math.min(ZONES.length - 1,Math.floor(x / ZONE_W)));
+}
 function fmt(n){
-  if(n<1000)return Math.floor(n).toString();
-  const units=["K","M","B","T"];
-  let i=-1;
-  while(n>=1000&&i<units.length-1){n/=1000;i++}
-  return n.toFixed(n>=100?0:n>=10?1:2)+units[i];
+  if(n < 1000) return Math.floor(n).toString();
+  const units = ["K","M","B","T","Q"];
+  let i = -1;
+  while(n >= 1000 && i < units.length - 1){
+    n /= 1000;
+    i++;
+  }
+  return n.toFixed(n >= 100 ? 0 : n >= 10 ? 1 : 2) + units[i];
 }
 
 function resize(){
-  const dpr=Math.min(devicePixelRatio||1,2);
-  canvas.width=Math.floor(innerWidth*dpr);
-  canvas.height=Math.floor(innerHeight*dpr);
-  canvas.style.width=innerWidth+"px";
-  canvas.style.height=innerHeight+"px";
+  const dpr = Math.min(devicePixelRatio || 1,2);
+  canvas.width = Math.floor(innerWidth * dpr);
+  canvas.height = Math.floor(innerHeight * dpr);
+  canvas.style.width = innerWidth + "px";
+  canvas.style.height = innerHeight + "px";
   ctx.setTransform(dpr,0,0,dpr,0,0);
 }
 addEventListener("resize",resize);
 resize();
 
 function createNodes(){
-  nodes=[];
-  let seed=87341;
-  const random=()=>{
-    seed=(seed*16807)%2147483647;
-    return (seed-1)/2147483646;
+  nodes = [];
+  let seed = 87341;
+
+  const random = () => {
+    seed = (seed * 16807) % 2147483647;
+    return (seed - 1) / 2147483646;
   };
-  for(let z=0;z<ZONES.length;z++){
-    for(let i=0;i<24;i++){
-      const x=z*ZONE_W+100+random()*(ZONE_W-200);
-      const y=100+random()*(WORLD_H-200);
-      const size=16+random()*13;
+
+  for(let z = 0; z < ZONES.length; z++){
+    for(let i = 0; i < 24; i++){
+      const x = z * ZONE_W + 100 + random() * (ZONE_W - 200);
+      const y = 100 + random() * (WORLD_H - 200);
+      const size = 16 + random() * 13;
+
       nodes.push({
         x,y,size,zone:z,
         hp:ZONES[z].hp,
         maxHp:ZONES[z].hp,
         alive:true,
         respawn:0,
-        phase:random()*6.28
+        phase:random() * Math.PI * 2
       });
     }
   }
 }
 createNodes();
 
-function save(){
-  try{
-    localStorage.setItem(SAVE_KEY,JSON.stringify({
-      state,
-      player:{x:player.x,y:player.y}
-    }));
-  }catch(e){}
+function getSaveData(){
+  return {
+    version:2,
+    state:{
+      coins:Math.max(0,Number(state.coins) || 0),
+      gems:Math.max(0,Number(state.gems) || 0),
+      ore:Math.max(0,Number(state.ore) || 0),
+      oreValue:Math.max(0,Number(state.oreValue) || 0),
+      powerLevel:Math.max(1,Math.floor(Number(state.powerLevel) || 1)),
+      bagLevel:Math.max(1,Math.floor(Number(state.bagLevel) || 1)),
+      speedLevel:Math.max(1,Math.floor(Number(state.speedLevel) || 1)),
+      critLevel:Math.max(1,Math.floor(Number(state.critLevel) || 1)),
+      luckLevel:Math.max(1,Math.floor(Number(state.luckLevel) || 1)),
+      autoLevel:Math.max(0,Math.floor(Number(state.autoLevel) || 0)),
+      breakthroughs:Math.max(0,Math.floor(Number(state.breakthroughs) || 0)),
+      maxZone:Math.max(0,Math.min(ZONES.length - 1,Math.floor(Number(state.maxZone) || 0))),
+      totalEarned:Math.max(0,Number(state.totalEarned) || 0)
+    },
+    player:{
+      x:Math.max(40,Math.min(WORLD_W - 40,Number(player.x) || 170)),
+      y:Math.max(45,Math.min(WORLD_H - 45,Number(player.y) || WORLD_H / 2))
+    }
+  };
 }
 
-function load(){
+function saveLocal(){
   try{
-    const data=JSON.parse(localStorage.getItem(SAVE_KEY));
-    if(data&&data.state){
-      Object.assign(state,data.state);
-      if(data.player){
-        player.x=Math.max(80,Math.min(WORLD_W-80,data.player.x||170));
-        player.y=Math.max(70,Math.min(WORLD_H-70,data.player.y||WORLD_H/2));
-      }
-    }
-  }catch(e){}
+    localStorage.setItem(SAVE_KEY,JSON.stringify(getSaveData()));
+  }catch(error){}
 }
-load();
-setInterval(save,5000);
-addEventListener("beforeunload",save);
+
+function applySaveData(data){
+  if(!data || typeof data !== "object" || !data.state){
+    throw new Error("Неверное сохранение");
+  }
+
+  const fresh = defaultState();
+  const incoming = data.state;
+
+  for(const key of Object.keys(fresh)){
+    if(Number.isFinite(Number(incoming[key]))){
+      fresh[key] = Number(incoming[key]);
+    }
+  }
+
+  fresh.coins = Math.max(0,fresh.coins);
+  fresh.gems = Math.max(0,fresh.gems);
+  fresh.ore = Math.max(0,fresh.ore);
+  fresh.oreValue = Math.max(0,fresh.oreValue);
+  fresh.powerLevel = Math.max(1,Math.floor(fresh.powerLevel));
+  fresh.bagLevel = Math.max(1,Math.floor(fresh.bagLevel));
+  fresh.speedLevel = Math.max(1,Math.floor(fresh.speedLevel));
+  fresh.critLevel = Math.max(1,Math.floor(fresh.critLevel));
+  fresh.luckLevel = Math.max(1,Math.floor(fresh.luckLevel));
+  fresh.autoLevel = Math.max(0,Math.floor(fresh.autoLevel));
+  fresh.breakthroughs = Math.max(0,Math.floor(fresh.breakthroughs));
+  fresh.maxZone = Math.max(0,Math.min(ZONES.length - 1,Math.floor(fresh.maxZone)));
+  fresh.totalEarned = Math.max(0,fresh.totalEarned);
+  fresh.ore = Math.min(fresh.ore,20 + (fresh.bagLevel - 1) * 20);
+
+  state = fresh;
+
+  if(data.player){
+    player.x = Math.max(40,Math.min(
+      WORLD_W - 40,
+      Number(data.player.x) || 170
+    ));
+    player.y = Math.max(45,Math.min(
+      WORLD_H - 45,
+      Number(data.player.y) || WORLD_H / 2
+    ));
+  }else{
+    player.x = 170;
+    player.y = WORLD_H / 2;
+  }
+
+  createNodes();
+  particles = [];
+  camera.x = Math.max(0,player.x - innerWidth / 2);
+  camera.y = Math.max(0,player.y - innerHeight / 2);
+  updateUI();
+  saveLocal();
+}
+
+function loadLocal(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(raw) applySaveData(JSON.parse(raw));
+  }catch(error){}
+}
+loadLocal();
+
+setInterval(saveLocal,5000);
+addEventListener("beforeunload",saveLocal);
+
+function bytesToHex(bytes){
+  let result = "";
+  for(const byte of bytes){
+    result += byte.toString(16).padStart(2,"0").toUpperCase();
+  }
+  return result;
+}
+
+function hexToBytes(hex){
+  if(hex.length % 2 !== 0 || !/^[0-9A-F]+$/i.test(hex)){
+    throw new Error("Неверные символы");
+  }
+
+  const bytes = new Uint8Array(hex.length / 2);
+  for(let i = 0; i < bytes.length; i++){
+    bytes[i] = parseInt(hex.slice(i * 2,i * 2 + 2),16);
+  }
+  return bytes;
+}
+
+function checksum(text){
+  let hash = 2166136261;
+
+  for(let i = 0; i < text.length; i++){
+    hash ^= text.charCodeAt(i);
+    hash = Math.imul(hash,16777619);
+  }
+
+  return (hash >>> 0).toString(16).toUpperCase().padStart(8,"0");
+}
+
+function createSaveCode(){
+  const json = JSON.stringify(getSaveData());
+  const bytes = new TextEncoder().encode(json);
+  const payload = bytesToHex(bytes);
+  return SAVE_PREFIX + payload + checksum(payload);
+}
+
+function decodeSaveCode(code){
+  const clean = String(code || "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g,"");
+
+  if(!clean.startsWith(SAVE_PREFIX)){
+    throw new Error("Номер начинается неправильно");
+  }
+
+  if(clean.length <= SAVE_PREFIX.length + 8){
+    throw new Error("Номер слишком короткий");
+  }
+
+  const body = clean.slice(SAVE_PREFIX.length);
+  const payload = body.slice(0,-8);
+  const receivedChecksum = body.slice(-8);
+
+  if(checksum(payload) !== receivedChecksum){
+    throw new Error("Номер повреждён или скопирован не полностью");
+  }
+
+  const bytes = hexToBytes(payload);
+  const json = new TextDecoder().decode(bytes);
+  return JSON.parse(json);
+}
+
+function generateSaveNumber(openPanel = true){
+  saveLocal();
+  latestSaveCode = createSaveCode();
+  $("saveCode").value = latestSaveCode;
+
+  if(openPanel){
+    closePanels();
+    $("savePanel").style.display = "block";
+  }
+
+  showMessage("Сохранение создано","#70ff9e");
+  return latestSaveCode;
+}
+
+async function copyText(text){
+  if(!text) throw new Error("Номер пуст");
+
+  if(navigator.clipboard && window.isSecureContext){
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const area = $("saveCode");
+  const oldValue = area.value;
+  area.value = text;
+  area.focus();
+  area.select();
+
+  const success = document.execCommand("copy");
+  area.value = oldValue || text;
+
+  if(!success) throw new Error("Не удалось скопировать");
+}
+
+async function copySaveNumber(){
+  try{
+    const code = generateSaveNumber(false);
+    $("saveCode").value = code;
+    await copyText(code);
+    showMessage("Номер сохранения скопирован","#9effbc");
+  }catch(error){
+    closePanels();
+    $("savePanel").style.display = "block";
+    $("saveCode").focus();
+    $("saveCode").select();
+    showMessage("Выдели номер и скопируй вручную","#ffcf70");
+  }
+}
+
+function loadFromSaveNumber(){
+  try{
+    const code = $("saveCode").value.trim();
+
+    if(!code){
+      showMessage("Сначала вставь номер сохранения","#ffcf70");
+      return;
+    }
+
+    const data = decodeSaveCode(code);
+    applySaveData(data);
+    latestSaveCode = createSaveCode();
+    $("saveCode").value = latestSaveCode;
+    closePanels();
+    showMessage("Сохранение другого игрока загружено","#70ff9e");
+  }catch(error){
+    showMessage(error.message || "Неверный номер сохранения","#ff6868");
+  }
+}
 
 function showMessage(text,color="#fff"){
-  const el=$("message");
-  el.textContent=text;
-  el.style.color=color;
-  el.style.opacity="1";
+  const el = $("message");
+  el.textContent = text;
+  el.style.color = color;
+  el.style.opacity = "1";
+
   clearTimeout(messageTimer);
-  messageTimer=setTimeout(()=>el.style.opacity="0",1700);
+  messageTimer = setTimeout(() => {
+    el.style.opacity = "0";
+  },1900);
 }
 
 function updateUI(){
-  const z=zoneAt(player.x);
-  $("zoneName").textContent=ZONES[z].name;
-  $("coins").textContent=fmt(state.coins);
-  $("gems").textContent=fmt(state.gems);
-  $("bag").textContent=fmt(state.ore)+" / "+fmt(capacity());
-  $("power").textContent=fmt(power());
-  $("multi").textContent="×"+multiplier().toFixed(2);
-  $("capacityFill").style.width=Math.min(100,state.ore/capacity()*100)+"%";
-  $("capacityFill").style.background=state.ore>=capacity()?"#ff5e5e":"#56e18d";
+  const z = zoneAt(player.x);
+
+  $("zoneName").textContent = ZONES[z].name;
+  $("coins").textContent = fmt(state.coins);
+  $("gems").textContent = fmt(state.gems);
+  $("bag").textContent = fmt(state.ore) + " / " + fmt(capacity());
+  $("power").textContent = fmt(power());
+  $("multi").textContent = "×" + multiplier().toFixed(2);
+
+  $("capacityFill").style.width =
+    Math.min(100,state.ore / capacity() * 100) + "%";
+
+  $("capacityFill").style.background =
+    state.ore >= capacity() ? "#ff5e5e" : "#56e18d";
 }
 
-const upgradeData=[
-  {key:"powerLevel",name:"Сила кирки",description:"Больше урона по залежам.",base:35,growth:1.72},
-  {key:"bagLevel",name:"Вместимость рюкзака",description:"+20 мест для руды.",base:60,growth:1.8},
-  {key:"speedLevel",name:"Скорость движения",description:"Быстрее исследуй шахту.",base:90,growth:1.85},
-  {key:"critLevel",name:"Критический удар",description:"Шанс нанести тройной урон.",base:150,growth:1.95},
-  {key:"luckLevel",name:"Удача",description:"Повышает стоимость добычи.",base:250,growth:2.05},
-  {key:"autoLevel",name:"Автодобыча",description:"Автоматически бьёт ближайшую залежь.",base:1000,growth:2.4}
+const upgradeData = [
+  {
+    key:"powerLevel",
+    name:"Сила кирки",
+    description:"Больше урона по залежам.",
+    base:35,
+    growth:1.72
+  },
+  {
+    key:"bagLevel",
+    name:"Вместимость рюкзака",
+    description:"+20 мест для руды.",
+    base:60,
+    growth:1.8
+  },
+  {
+    key:"speedLevel",
+    name:"Скорость движения",
+    description:"Быстрее исследуй шахту.",
+    base:90,
+    growth:1.85
+  },
+  {
+    key:"critLevel",
+    name:"Критический удар",
+    description:"Шанс нанести тройной урон.",
+    base:150,
+    growth:1.95
+  },
+  {
+    key:"luckLevel",
+    name:"Удача",
+    description:"Повышает стоимость добычи.",
+    base:250,
+    growth:2.05
+  },
+  {
+    key:"autoLevel",
+    name:"Автодобыча",
+    description:"Автоматически бьёт ближайшую залежь.",
+    base:1000,
+    growth:2.4
+  }
 ];
 
-function upgradeCost(u){
-  const level=state[u.key];
-  return Math.floor(u.base*Math.pow(u.growth,level-(u.key==="autoLevel"?0:1)));
+function upgradeCost(upgrade){
+  const level = state[upgrade.key];
+
+  return Math.floor(
+    upgrade.base *
+    Math.pow(
+      upgrade.growth,
+      level - (upgrade.key === "autoLevel" ? 0 : 1)
+    )
+  );
 }
 
 function renderShop(){
-  const list=$("upgradeList");
-  list.innerHTML="";
-  upgradeData.forEach(u=>{
-    const cost=upgradeCost(u);
-    const level=state[u.key];
-    const div=document.createElement("div");
-    div.className="upgrade";
-    div.innerHTML=`
-      <div><b>${u.name}</b><br><small>${u.description}<br>Уровень: ${level}</small></div>
-      <button ${state.coins<cost?"disabled":""}>${fmt(cost)} монет</button>`;
-    div.querySelector("button").onclick=()=>{
-      if(state.coins<cost)return;
-      state.coins-=cost;
-      state[u.key]++;
+  const list = $("upgradeList");
+  list.innerHTML = "";
+
+  upgradeData.forEach(upgrade => {
+    const cost = upgradeCost(upgrade);
+    const level = state[upgrade.key];
+    const div = document.createElement("div");
+
+    div.className = "upgrade";
+    div.innerHTML = `
+      <div>
+        <b>${upgrade.name}</b><br>
+        <small>
+          ${upgrade.description}<br>
+          Уровень: ${level}
+        </small>
+      </div>
+      <button ${state.coins < cost ? "disabled" : ""}>
+        ${fmt(cost)} монет
+      </button>
+    `;
+
+    div.querySelector("button").onclick = () => {
+      if(state.coins < cost) return;
+
+      state.coins -= cost;
+      state[upgrade.key]++;
       renderShop();
       updateUI();
-      save();
+      saveLocal();
     };
+
     list.appendChild(div);
   });
 }
 
-function openShop(){
-  renderShop();
-  $("panel").style.display="block";
+function closePanels(){
+  $("shopPanel").style.display = "none";
+  $("savePanel").style.display = "none";
 }
-function closeShop(){$("panel").style.display="none"}
-$("shopButton").onclick=openShop;
-$("shopMobile").onclick=openShop;
-$("panelClose").onclick=closeShop;
+
+function openShop(){
+  closePanels();
+  renderShop();
+  $("shopPanel").style.display = "block";
+}
+
+function openSavePanel(){
+  closePanels();
+  $("savePanel").style.display = "block";
+
+  if(!$("saveCode").value){
+    $("saveCode").value = createSaveCode();
+  }
+}
+
+$("shopButton").onclick = openShop;
+$("shopMobile").onclick = openShop;
+$("shopClose").onclick = closePanels;
+$("saveClose").onclick = closePanels;
+$("openSaveButton").onclick = openSavePanel;
+
+$("saveButton").onclick = () => generateSaveNumber(true);
+$("copySaveButton").onclick = copySaveNumber;
+$("generateCodeButton").onclick = () => generateSaveNumber(false);
+$("copyCodePanelButton").onclick = async () => {
+  try{
+    const code = $("saveCode").value.trim() || generateSaveNumber(false);
+    await copyText(code);
+    showMessage("Номер сохранения скопирован","#9effbc");
+  }catch(error){
+    $("saveCode").focus();
+    $("saveCode").select();
+    showMessage("Выдели номер и скопируй вручную","#ffcf70");
+  }
+};
+$("loadCodeButton").onclick = loadFromSaveNumber;
 
 function sell(){
-  if(state.ore<=0){
+  if(state.ore <= 0){
     showMessage("Рюкзак пуст","#ffcf70");
     return;
   }
-  const earned=Math.floor(state.oreValue*multiplier());
-  state.coins+=earned;
-  state.totalEarned+=earned;
-  state.ore=0;
-  state.oreValue=0;
-  showMessage("Продано: +"+fmt(earned)+" монет","#70ff9e");
+
+  const earned = Math.floor(state.oreValue * multiplier());
+
+  state.coins += earned;
+  state.totalEarned += earned;
+  state.ore = 0;
+  state.oreValue = 0;
+
+  showMessage("Продано: +" + fmt(earned) + " монет","#70ff9e");
   updateUI();
-  save();
+  saveLocal();
 }
-$("sellButton").onclick=sell;
-$("sellMobile").onclick=sell;
+
+$("sellButton").onclick = sell;
+$("sellMobile").onclick = sell;
 
 function breakthrough(){
-  const needed=250000*Math.pow(4,state.breakthroughs);
-  if(state.totalEarned<needed){
-    showMessage("Для прорыва нужно заработать "+fmt(needed)+" монет","#ffcf70");
+  const needed = 250000 * Math.pow(4,state.breakthroughs);
+
+  if(state.totalEarned < needed){
+    showMessage(
+      "Для прорыва нужно заработать " + fmt(needed) + " монет",
+      "#ffcf70"
+    );
     return;
   }
-  if(!confirm("Совершить Прорыв? Монеты и улучшения сбросятся, но множитель добычи навсегда увеличится."))return;
-  state.breakthroughs++;
-  const keptGems=state.gems+10*state.breakthroughs;
-  state={
-    coins:0,gems:keptGems,ore:0,oreValue:0,
-    powerLevel:1,bagLevel:1,speedLevel:1,critLevel:1,
-    luckLevel:1,autoLevel:0,breakthroughs:state.breakthroughs,
-    maxZone:0,totalEarned:0
-  };
-  player.x=170;
-  player.y=WORLD_H/2;
+
+  if(!confirm(
+    "Совершить Прорыв? Монеты и улучшения сбросятся, но множитель добычи навсегда увеличится."
+  )) return;
+
+  const newBreakthroughs = state.breakthroughs + 1;
+  const keptGems = state.gems + 10 * newBreakthroughs;
+
+  state = defaultState();
+  state.breakthroughs = newBreakthroughs;
+  state.gems = keptGems;
+
+  player.x = 170;
+  player.y = WORLD_H / 2;
+
   createNodes();
   showMessage("ПРОРЫВ! Множитель увеличен.","#dba7ff");
   updateUI();
-  save();
+  saveLocal();
 }
-$("breakButton").onclick=breakthrough;
 
-addEventListener("keydown",e=>{
-  keys[e.key.toLowerCase()]=true;
-  if(["arrowup","arrowdown","arrowleft","arrowright"," "].includes(e.key.toLowerCase()))e.preventDefault();
-  if(e.key.toLowerCase()==="e"||e.key===" ")mineNearest();
-});
-addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
+$("breakButton").onclick = breakthrough;
 
-canvas.addEventListener("pointerdown",e=>{
-  if(e.pointerType==="touch")return;
-  const wx=e.clientX+camera.x;
-  const wy=e.clientY+camera.y;
-  let target=null,dist=Infinity;
-  for(const n of nodes){
-    if(!n.alive)continue;
-    const d=Math.hypot(n.x-wx,n.y-wy);
-    if(d<n.size+25&&d<dist){target=n;dist=d}
+addEventListener("keydown",event => {
+  if(
+    $("shopPanel").style.display === "block" ||
+    $("savePanel").style.display === "block"
+  ){
+    if(event.key === "Escape") closePanels();
+    return;
   }
-  if(target&&Math.hypot(target.x-player.x,target.y-player.y)<105)hitNode(target);
-  else mineNearest();
+
+  keys[event.key.toLowerCase()] = true;
+
+  if(
+    ["arrowup","arrowdown","arrowleft","arrowright"," "]
+      .includes(event.key.toLowerCase())
+  ){
+    event.preventDefault();
+  }
+
+  if(event.key.toLowerCase() === "e" || event.key === " "){
+    mineNearest();
+  }
 });
 
-const joyBase=$("joystick");
-const stick=$("stick");
-function updateJoy(e){
-  const r=joyBase.getBoundingClientRect();
-  let x=e.clientX-(r.left+r.width/2);
-  let y=e.clientY-(r.top+r.height/2);
-  const max=42;
-  const len=Math.hypot(x,y)||1;
-  if(len>max){x=x/len*max;y=y/len*max}
-  joy.x=x/max;
-  joy.y=y/max;
-  stick.style.transform=`translate(${x}px,${y}px)`;
-}
-joyBase.addEventListener("pointerdown",e=>{
-  joy.active=true;
-  joyBase.setPointerCapture(e.pointerId);
-  updateJoy(e);
+addEventListener("keyup",event => {
+  keys[event.key.toLowerCase()] = false;
 });
-joyBase.addEventListener("pointermove",e=>{if(joy.active)updateJoy(e)});
-function endJoy(){
-  joy.active=false;joy.x=joy.y=0;
-  stick.style.transform="translate(0,0)";
+
+canvas.addEventListener("pointerdown",event => {
+  if(event.pointerType === "touch") return;
+
+  const wx = event.clientX + camera.x;
+  const wy = event.clientY + camera.y;
+  let target = null;
+  let distance = Infinity;
+
+  for(const node of nodes){
+    if(!node.alive) continue;
+
+    const d = Math.hypot(node.x - wx,node.y - wy);
+
+    if(d < node.size + 25 && d < distance){
+      target = node;
+      distance = d;
+    }
+  }
+
+  if(
+    target &&
+    Math.hypot(target.x - player.x,target.y - player.y) < 105
+  ){
+    hitNode(target);
+  }else{
+    mineNearest();
+  }
+});
+
+const joyBase = $("joystick");
+const stick = $("stick");
+
+function updateJoy(event){
+  const rect = joyBase.getBoundingClientRect();
+  let x = event.clientX - (rect.left + rect.width / 2);
+  let y = event.clientY - (rect.top + rect.height / 2);
+  const max = 42;
+  const length = Math.hypot(x,y) || 1;
+
+  if(length > max){
+    x = x / length * max;
+    y = y / length * max;
+  }
+
+  joy.x = x / max;
+  joy.y = y / max;
+  stick.style.transform = `translate(${x}px,${y}px)`;
 }
+
+joyBase.addEventListener("pointerdown",event => {
+  joy.active = true;
+  joyBase.setPointerCapture(event.pointerId);
+  updateJoy(event);
+});
+
+joyBase.addEventListener("pointermove",event => {
+  if(joy.active) updateJoy(event);
+});
+
+function endJoy(){
+  joy.active = false;
+  joy.x = 0;
+  joy.y = 0;
+  stick.style.transform = "translate(0,0)";
+}
+
 joyBase.addEventListener("pointerup",endJoy);
 joyBase.addEventListener("pointercancel",endJoy);
 
-$("mineButton").addEventListener("pointerdown",e=>{
-  e.preventDefault();mining=true;mineNearest();
+$("mineButton").addEventListener("pointerdown",event => {
+  event.preventDefault();
+  mining = true;
+  mineNearest();
 });
-$("mineButton").addEventListener("pointerup",()=>mining=false);
-$("mineButton").addEventListener("pointercancel",()=>mining=false);
+
+$("mineButton").addEventListener("pointerup",() => mining = false);
+$("mineButton").addEventListener("pointercancel",() => mining = false);
 
 function nearestNode(){
-  let best=null,bestD=100;
-  for(const n of nodes){
-    if(!n.alive)continue;
-    const d=Math.hypot(n.x-player.x,n.y-player.y);
-    if(d<bestD){best=n;bestD=d}
+  let best = null;
+  let bestDistance = 100;
+
+  for(const node of nodes){
+    if(!node.alive) continue;
+
+    const distance = Math.hypot(
+      node.x - player.x,
+      node.y - player.y
+    );
+
+    if(distance < bestDistance){
+      best = node;
+      bestDistance = distance;
+    }
   }
+
   return best;
 }
 
 function mineNearest(){
-  if(state.ore>=capacity()){
+  if(state.ore >= capacity()){
     showMessage("Рюкзак заполнен! Продай руду.","#ffcb70");
     return;
   }
-  const n=nearestNode();
-  if(!n){
+
+  const node = nearestNode();
+
+  if(!node){
     showMessage("Подойди ближе к залежи","#ddd");
     return;
   }
-  hitNode(n);
+
+  hitNode(node);
 }
 
-function hitNode(n){
-  let damage=power();
-  const critical=Math.random()<critChance();
-  if(critical)damage*=3;
-  n.hp-=damage;
-  player.dir=Math.atan2(n.y-player.y,n.x-player.x);
-  for(let i=0;i<7;i++){
+function hitNode(node){
+  let damage = power();
+  const critical = Math.random() < critChance();
+
+  if(critical) damage *= 3;
+
+  node.hp -= damage;
+  player.dir = Math.atan2(
+    node.y - player.y,
+    node.x - player.x
+  );
+
+  for(let i = 0; i < 7; i++){
     particles.push({
-      x:n.x,y:n.y,
-      vx:(Math.random()-.5)*150,
-      vy:(Math.random()-.5)*150,
-      life:.45+Math.random()*.25,
-      color:ZONES[n.zone].ore
+      x:node.x,
+      y:node.y,
+      vx:(Math.random() - .5) * 150,
+      vy:(Math.random() - .5) * 150,
+      life:.45 + Math.random() * .25,
+      color:ZONES[node.zone].ore
     });
   }
-  if(critical)showMessage("КРИТИЧЕСКИЙ УДАР!","#ffe46b");
-  if(n.hp<=0)breakNode(n);
+
+  if(critical){
+    showMessage("КРИТИЧЕСКИЙ УДАР!","#ffe46b");
+  }
+
+  if(node.hp <= 0){
+    breakNode(node);
+  }
 }
 
-function breakNode(n){
-  n.alive=false;
-  n.respawn=4+Math.random()*5;
-  const free=capacity()-state.ore;
-  const amount=Math.min(free,1+Math.floor(Math.random()*3));
-  const value=amount*ZONES[n.zone].value;
-  state.ore+=amount;
-  state.oreValue+=value;
-  if(Math.random()<.018+.004*state.luckLevel){
+function breakNode(node){
+  node.alive = false;
+  node.respawn = 4 + Math.random() * 5;
+
+  const free = capacity() - state.ore;
+  const amount = Math.min(
+    free,
+    1 + Math.floor(Math.random() * 3)
+  );
+
+  state.ore += amount;
+  state.oreValue += amount * ZONES[node.zone].value;
+
+  if(Math.random() < .018 + .004 * state.luckLevel){
     state.gems++;
     showMessage("Найден редкий кристалл!","#d680ff");
   }
-  if(state.ore>=capacity())showMessage("Рюкзак заполнен!","#ffcb70");
+
+  if(state.ore >= capacity()){
+    showMessage("Рюкзак заполнен!","#ffcb70");
+  }
+
   updateUI();
 }
 
 function tryPassGate(oldX,newX){
-  for(let i=1;i<ZONES.length;i++){
-    const gateX=i*ZONE_W;
-    if(oldX<gateX&&newX>=gateX){
-      if(state.maxZone<i){
-        const cost=ZONES[i].unlock;
-        if(state.coins<cost){
-          showMessage("Нужно "+fmt(cost)+" монет для открытия прохода","#ffcf70");
-          return gateX-35;
+  for(let i = 1; i < ZONES.length; i++){
+    const gateX = i * ZONE_W;
+
+    if(oldX < gateX && newX >= gateX){
+      if(state.maxZone < i){
+        const cost = ZONES[i].unlock;
+
+        if(state.coins < cost){
+          showMessage(
+            "Нужно " + fmt(cost) + " монет для открытия прохода",
+            "#ffcf70"
+          );
+          return gateX - 35;
         }
-        state.coins-=cost;
-        state.maxZone=i;
-        showMessage("Открыта локация: "+ZONES[i].name,"#79eaff");
-        save();
+
+        state.coins -= cost;
+        state.maxZone = i;
+
+        showMessage(
+          "Открыта локация: " + ZONES[i].name,
+          "#79eaff"
+        );
+
+        saveLocal();
       }
     }
   }
+
   return newX;
 }
 
 function update(dt){
-  let dx=0,dy=0;
-  if(keys.w||keys.arrowup)dy--;
-  if(keys.s||keys.arrowdown)dy++;
-  if(keys.a||keys.arrowleft)dx--;
-  if(keys.d||keys.arrowright)dx++;
-  dx+=joy.x;dy+=joy.y;
-  const length=Math.hypot(dx,dy);
-  if(length>.05){
-    dx/=Math.max(1,length);
-    dy/=Math.max(1,length);
-    const oldX=player.x;
-    let nx=player.x+dx*speed()*dt;
-    nx=tryPassGate(oldX,nx);
-    player.x=Math.max(40,Math.min(WORLD_W-40,nx));
-    player.y=Math.max(45,Math.min(WORLD_H-45,player.y+dy*speed()*dt));
-    player.dir=Math.atan2(dy,dx);
+  let dx = 0;
+  let dy = 0;
+
+  if(keys.w || keys.arrowup) dy--;
+  if(keys.s || keys.arrowdown) dy++;
+  if(keys.a || keys.arrowleft) dx--;
+  if(keys.d || keys.arrowright) dx++;
+
+  dx += joy.x;
+  dy += joy.y;
+
+  const length = Math.hypot(dx,dy);
+
+  if(length > .05){
+    dx /= Math.max(1,length);
+    dy /= Math.max(1,length);
+
+    const oldX = player.x;
+    let newX = player.x + dx * speed() * dt;
+    newX = tryPassGate(oldX,newX);
+
+    player.x = Math.max(40,Math.min(WORLD_W - 40,newX));
+    player.y = Math.max(
+      45,
+      Math.min(WORLD_H - 45,player.y + dy * speed() * dt)
+    );
+
+    player.dir = Math.atan2(dy,dx);
   }
 
-  for(const n of nodes){
-    if(!n.alive){
-      n.respawn-=dt;
-      if(n.respawn<=0){n.alive=true;n.hp=n.maxHp}
+  for(const node of nodes){
+    if(!node.alive){
+      node.respawn -= dt;
+
+      if(node.respawn <= 0){
+        node.alive = true;
+        node.hp = node.maxHp;
+      }
     }
   }
 
-  for(let i=particles.length-1;i>=0;i--){
-    const p=particles[i];
-    p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;
-    p.vx*=.94;p.vy*=.94;
-    if(p.life<=0)particles.splice(i,1);
+  for(let i = particles.length - 1; i >= 0; i--){
+    const particle = particles[i];
+
+    particle.life -= dt;
+    particle.x += particle.vx * dt;
+    particle.y += particle.vy * dt;
+    particle.vx *= .94;
+    particle.vy *= .94;
+
+    if(particle.life <= 0){
+      particles.splice(i,1);
+    }
   }
 
-  autoTimer-=dt;
-  if(state.autoLevel>0&&autoTimer<=0){
-    const n=nearestNode();
-    if(n)hitNode(n);
-    autoTimer=Math.max(.16,1.2-state.autoLevel*.09);
-  }
-  if(mining&&autoTimer<=.08)mineNearest();
+  autoTimer -= dt;
+  miningTimer -= dt;
 
-  const targetX=player.x-innerWidth/2;
-  const targetY=player.y-innerHeight/2;
-  camera.x+=(targetX-camera.x)*Math.min(1,dt*6);
-  camera.y+=(targetY-camera.y)*Math.min(1,dt*6);
-  camera.x=Math.max(0,Math.min(WORLD_W-innerWidth,camera.x));
-  camera.y=Math.max(0,Math.min(WORLD_H-innerHeight,camera.y));
+  if(state.autoLevel > 0 && autoTimer <= 0){
+    const node = nearestNode();
+
+    if(node) hitNode(node);
+
+    autoTimer = Math.max(.16,1.2 - state.autoLevel * .09);
+  }
+
+  if(mining && miningTimer <= 0){
+    mineNearest();
+    miningTimer = .22;
+  }
+
+  const targetX = player.x - innerWidth / 2;
+  const targetY = player.y - innerHeight / 2;
+
+  camera.x += (targetX - camera.x) * Math.min(1,dt * 6);
+  camera.y += (targetY - camera.y) * Math.min(1,dt * 6);
+
+  camera.x = Math.max(
+    0,
+    Math.min(Math.max(0,WORLD_W - innerWidth),camera.x)
+  );
+
+  camera.y = Math.max(
+    0,
+    Math.min(Math.max(0,WORLD_H - innerHeight),camera.y)
+  );
+
   updateUI();
 }
 
 function drawCrystal(x,y,size,color,hpRatio,phase){
   ctx.save();
   ctx.translate(x,y);
-  const pulse=1+Math.sin(performance.now()/500+phase)*.035;
+
+  const pulse =
+    1 + Math.sin(performance.now() / 500 + phase) * .035;
+
   ctx.scale(pulse,pulse);
-  ctx.shadowBlur=18;
-  ctx.shadowColor=color;
-  ctx.fillStyle=color;
+  ctx.shadowBlur = 18;
+  ctx.shadowColor = color;
+  ctx.fillStyle = color;
+
   ctx.beginPath();
   ctx.moveTo(0,-size);
-  ctx.lineTo(size*.72,-size*.2);
-  ctx.lineTo(size*.55,size*.75);
-  ctx.lineTo(-size*.5,size);
-  ctx.lineTo(-size*.8,-size*.12);
+  ctx.lineTo(size * .72,-size * .2);
+  ctx.lineTo(size * .55,size * .75);
+  ctx.lineTo(-size * .5,size);
+  ctx.lineTo(-size * .8,-size * .12);
   ctx.closePath();
   ctx.fill();
-  ctx.shadowBlur=0;
-  ctx.fillStyle="rgba(255,255,255,.45)";
+
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = "rgba(255,255,255,.45)";
+
   ctx.beginPath();
-  ctx.moveTo(0,-size*.8);
-  ctx.lineTo(size*.2,-size*.2);
-  ctx.lineTo(-size*.25,size*.45);
+  ctx.moveTo(0,-size * .8);
+  ctx.lineTo(size * .2,-size * .2);
+  ctx.lineTo(-size * .25,size * .45);
   ctx.closePath();
   ctx.fill();
-  if(hpRatio<1){
-    ctx.fillStyle="#1a1a1a";
-    ctx.fillRect(-size,-size-12,size*2,5);
-    ctx.fillStyle="#74ff91";
-    ctx.fillRect(-size,-size-12,size*2*Math.max(0,hpRatio),5);
+
+  if(hpRatio < 1){
+    ctx.fillStyle = "#1a1a1a";
+    ctx.fillRect(-size,-size - 12,size * 2,5);
+
+    ctx.fillStyle = "#74ff91";
+    ctx.fillRect(
+      -size,
+      -size - 12,
+      size * 2 * Math.max(0,hpRatio),
+      5
+    );
   }
+
   ctx.restore();
 }
 
@@ -566,108 +1156,161 @@ function draw(){
   ctx.save();
   ctx.translate(-camera.x,-camera.y);
 
-  for(let z=0;z<ZONES.length;z++){
-    const x=z*ZONE_W;
-    ctx.fillStyle=ZONES[z].floor;
+  for(let z = 0; z < ZONES.length; z++){
+    const x = z * ZONE_W;
+
+    ctx.fillStyle = ZONES[z].floor;
     ctx.fillRect(x,0,ZONE_W,WORLD_H);
 
-    ctx.globalAlpha=.16;
-    ctx.strokeStyle=ZONES[z].color;
-    ctx.lineWidth=2;
-    for(let gx=x;gx<x+ZONE_W;gx+=80){
-      ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,WORLD_H);ctx.stroke();
-    }
-    for(let gy=0;gy<WORLD_H;gy+=80){
-      ctx.beginPath();ctx.moveTo(x,gy);ctx.lineTo(x+ZONE_W,gy);ctx.stroke();
-    }
-    ctx.globalAlpha=1;
+    ctx.globalAlpha = .16;
+    ctx.strokeStyle = ZONES[z].color;
+    ctx.lineWidth = 2;
 
-    ctx.fillStyle=ZONES[z].color;
-    for(let i=0;i<10;i++){
-      const px=x+70+((i*173+z*91)%(ZONE_W-140));
-      const py=80+((i*257+z*113)%(WORLD_H-160));
+    for(let gridX = x; gridX < x + ZONE_W; gridX += 80){
       ctx.beginPath();
-      ctx.arc(px,py,22+(i%3)*10,0,Math.PI*2);
-      ctx.globalAlpha=.18;
+      ctx.moveTo(gridX,0);
+      ctx.lineTo(gridX,WORLD_H);
+      ctx.stroke();
+    }
+
+    for(let gridY = 0; gridY < WORLD_H; gridY += 80){
+      ctx.beginPath();
+      ctx.moveTo(x,gridY);
+      ctx.lineTo(x + ZONE_W,gridY);
+      ctx.stroke();
+    }
+
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = ZONES[z].color;
+
+    for(let i = 0; i < 10; i++){
+      const px = x + 70 + ((i * 173 + z * 91) % (ZONE_W - 140));
+      const py = 80 + ((i * 257 + z * 113) % (WORLD_H - 160));
+
+      ctx.beginPath();
+      ctx.arc(px,py,22 + (i % 3) * 10,0,Math.PI * 2);
+      ctx.globalAlpha = .18;
       ctx.fill();
     }
-    ctx.globalAlpha=1;
 
-    ctx.fillStyle="rgba(255,255,255,.12)";
-    ctx.font="bold 30px Arial";
-    ctx.textAlign="center";
-    ctx.fillText(ZONES[z].name,x+ZONE_W/2,55);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "rgba(255,255,255,.12)";
+    ctx.font = "bold 30px Arial";
+    ctx.textAlign = "center";
+    ctx.fillText(ZONES[z].name,x + ZONE_W / 2,55);
   }
 
-  for(let i=1;i<ZONES.length;i++){
-    const x=i*ZONE_W;
-    const unlocked=state.maxZone>=i;
-    ctx.fillStyle=unlocked?"rgba(87,255,160,.22)":"rgba(255,70,70,.3)";
-    ctx.fillRect(x-12,0,24,WORLD_H);
-    ctx.strokeStyle=unlocked?"#5dffa2":"#ff5757";
-    ctx.lineWidth=4;
+  for(let i = 1; i < ZONES.length; i++){
+    const x = i * ZONE_W;
+    const unlocked = state.maxZone >= i;
+
+    ctx.fillStyle = unlocked
+      ? "rgba(87,255,160,.22)"
+      : "rgba(255,70,70,.3)";
+
+    ctx.fillRect(x - 12,0,24,WORLD_H);
+
+    ctx.strokeStyle = unlocked ? "#5dffa2" : "#ff5757";
+    ctx.lineWidth = 4;
     ctx.setLineDash([18,12]);
-    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,WORLD_H);ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(x,0);
+    ctx.lineTo(x,WORLD_H);
+    ctx.stroke();
+
     ctx.setLineDash([]);
-    ctx.fillStyle="#fff";
-    ctx.font="bold 15px Arial";
-    ctx.textAlign="center";
-    ctx.fillText(unlocked?"ПРОХОД ОТКРЫТ":"ОТКРЫТЬ: "+fmt(ZONES[i].unlock)+" МОНЕТ",x,90);
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 15px Arial";
+    ctx.textAlign = "center";
+
+    ctx.fillText(
+      unlocked
+        ? "ПРОХОД ОТКРЫТ"
+        : "ОТКРЫТЬ: " + fmt(ZONES[i].unlock) + " МОНЕТ",
+      x,
+      90
+    );
   }
 
-  for(const n of nodes){
-    if(n.alive)drawCrystal(n.x,n.y,n.size,ZONES[n.zone].ore,n.hp/n.maxHp,n.phase);
+  for(const node of nodes){
+    if(node.alive){
+      drawCrystal(
+        node.x,
+        node.y,
+        node.size,
+        ZONES[node.zone].ore,
+        node.hp / node.maxHp,
+        node.phase
+      );
+    }
   }
 
-  for(const p of particles){
-    ctx.globalAlpha=Math.max(0,p.life*2);
-    ctx.fillStyle=p.color;
-    ctx.fillRect(p.x-3,p.y-3,6,6);
+  for(const particle of particles){
+    ctx.globalAlpha = Math.max(0,particle.life * 2);
+    ctx.fillStyle = particle.color;
+    ctx.fillRect(particle.x - 3,particle.y - 3,6,6);
   }
-  ctx.globalAlpha=1;
 
+  ctx.globalAlpha = 1;
   ctx.save();
   ctx.translate(player.x,player.y);
   ctx.rotate(player.dir);
-  ctx.shadowBlur=18;
-  ctx.shadowColor="#69cfff";
-  ctx.fillStyle="#62bff0";
-  ctx.beginPath();ctx.arc(0,0,player.r,0,Math.PI*2);ctx.fill();
-  ctx.shadowBlur=0;
-  ctx.fillStyle="#dff6ff";
+  ctx.shadowBlur = 18;
+  ctx.shadowColor = "#69cfff";
+  ctx.fillStyle = "#62bff0";
+
   ctx.beginPath();
-  ctx.moveTo(player.r+10,0);
-  ctx.lineTo(player.r-3,-7);
-  ctx.lineTo(player.r-3,7);
-  ctx.closePath();ctx.fill();
+  ctx.arc(0,0,player.r,0,Math.PI * 2);
+  ctx.fill();
+
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = "#dff6ff";
+
+  ctx.beginPath();
+  ctx.moveTo(player.r + 10,0);
+  ctx.lineTo(player.r - 3,-7);
+  ctx.lineTo(player.r - 3,7);
+  ctx.closePath();
+  ctx.fill();
   ctx.restore();
 
-  const near=nearestNode();
+  const near = nearestNode();
+
   if(near){
-    ctx.strokeStyle="rgba(255,255,255,.75)";
-    ctx.lineWidth=2;
+    ctx.strokeStyle = "rgba(255,255,255,.75)";
+    ctx.lineWidth = 2;
     ctx.setLineDash([5,5]);
+
     ctx.beginPath();
-    ctx.arc(near.x,near.y,near.size+9,0,Math.PI*2);
+    ctx.arc(near.x,near.y,near.size + 9,0,Math.PI * 2);
     ctx.stroke();
+
     ctx.setLineDash([]);
   }
 
   ctx.restore();
 
-  const gradient=ctx.createRadialGradient(
-    innerWidth/2,innerHeight/2,Math.min(innerWidth,innerHeight)*.25,
-    innerWidth/2,innerHeight/2,Math.max(innerWidth,innerHeight)*.75
+  const gradient = ctx.createRadialGradient(
+    innerWidth / 2,
+    innerHeight / 2,
+    Math.min(innerWidth,innerHeight) * .25,
+    innerWidth / 2,
+    innerHeight / 2,
+    Math.max(innerWidth,innerHeight) * .75
   );
+
   gradient.addColorStop(0,"rgba(0,0,0,0)");
   gradient.addColorStop(1,"rgba(0,0,0,.48)");
-  ctx.fillStyle=gradient;
+
+  ctx.fillStyle = gradient;
   ctx.fillRect(0,0,innerWidth,innerHeight);
 }
 
 function loop(now){
-  const dt=Math.min(.04,(now-lastTime)/1000);
-  lastTime=now;
+  const dt = Math.min(.04,(now - lastTime) / 1000);
+  lastTime = now;
+
   update(dt);
   draw();
   requestAnimationFrame(loop);
